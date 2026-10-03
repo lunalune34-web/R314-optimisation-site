@@ -80,7 +80,8 @@
       // On ajoute chaque entrée au fur et à mesure pour garder l'ordre.
       list.innerHTML += '<option value="' + TAGS[i] + '"></option>';
     }
-  }
+  } // On construit la chaîne HTML en mémoire pour éviter de bloquer le navigateur avec les modifications DOM
+
 
   /* Construit le calendrier d'activité : 53 semaines de 7 jours, la teinte de
      chaque case reflétant le nombre de prises de vue archivées ce jour-là. */
@@ -157,27 +158,34 @@
   /* Aligne la hauteur des cartes et anime leur arrivée dans le viewport. */
   function revealCards() {
     var cards = UIKit.qsa('.card');
+    if (!cards.length) return;
 
-    for (var i = 0; i < cards.length; i++) {
-      var rect = cards[i].getBoundingClientRect();
-
-      // Hauteur de la plus grande carte, pour garder une grille régulière.
-      var tallest = 0;
-      var all = UIKit.qsa('.card');
-      for (var j = 0; j < all.length; j++) {
-        if (all[j].offsetHeight > tallest) {
-          tallest = all[j].offsetHeight;
+    // On calcule d'abord la hauteur max de toutes les cartes
+    var tallest = 0;
+    for (var j = 0; j < cards.length; j++) {
+        var h = cards[j].offsetHeight; // Lecture seule
+        if (h > tallest) {
+            tallest = h;
         }
-      }
+    }
+ 
+    var rects = [];
+    for (var i = 0; i < cards.length; i++) {
+      rects.push(cards[i].getBoundingClientRect());
+    }
+
+    // applique les styles à la fin
+    for (var i = 0; i < cards.length; i++) {
       cards[i].style.minHeight = tallest + 'px';
 
-      if (rect.top < window.innerHeight - 40) {
+      if (rects[i].top < window.innerHeight - 40) {
         UIKit.cls(cards[i], 'visible', true);
         cards[i].style.transform = 'translateY(0px)';
       } else {
         cards[i].style.transform = 'translateY(24px)';
       }
     }
+  }
 
     // Les cases du calendrier apparaissent progressivement à l'approche.
     var jours = UIKit.qsa('.cal-day');
@@ -210,7 +218,20 @@
     if (champ) champ.addEventListener('input', filterGallery);
   });
 
-  window.addEventListener('scroll', revealCards);
-  window.addEventListener('resize', revealCards);
-  window.addEventListener('load', revealCards);
-})();
+// On évite de saturer le navigateur au scroll en utilisant requestAnimationFrame
+
+let ticking = false;
+
+function onScrollOrResize() {
+    if (!ticking) {
+        window.requestAnimationFrame(function() {
+            revealCards();
+            ticking = false;
+        });
+        ticking = true;
+    }
+}
+
+window.addEventListener('scroll', onScrollOrResize, { passive: true });
+window.addEventListener('resize', onScrollOrResize, { passive: true });
+window.addEventListener('load', revealCards);
