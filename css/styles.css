@@ -18,7 +18,7 @@ a{color:var(--fg);text-decoration:none;opacity:.9}a:hover{opacity:1}
 .section{padding:60px 0}.section h2{margin:0 0 20px}
 .gallery .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
 .card{background:var(--card);border-radius:16px;overflow:hidden;box-shadow:0 20px 60px var(--shadow)}
-.grid img {width: 100%;height: auto;} /* gère affichage des images dans la grille de la galerie */
+.grid img {width: 100%;height: auto; aspect-ratio: 16 / 9;} /* gère affichage des images dans la grille de la galerie */
 .card img{display:block;width:100%;height:auto;aspect-ratio: 16 / 9; max-width:100%;opacity:0;transition:opacity .6s ease} /* les images à l'intérieur doivent s'adapter à la largeur du conteneur + ne pas dépasser la taille max*/
 .card img.loaded{opacity:1}
 .features-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
